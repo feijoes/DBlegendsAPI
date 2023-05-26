@@ -1,5 +1,5 @@
 [package]
-name = "Scrapper"
+name = "scrapper"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 reqwest = {version = "0.11", features = ["blocking"]}
 scraper = "0.16.0"
+headless_chrome = {git = "https://github.com/atroche/rust-headless-chrome", features = ["fetch"]}
+tokio = { version = "1", features = ["full"] }
