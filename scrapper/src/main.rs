@@ -1,27 +1,57 @@
+mod structs;
+mod enums;
 use std::{error::Error};
-use tokio::runtime::Runtime;
+use serde::{ Deserialize, Serialize };
+use serde_with::skip_serializing_none;
+use structs::{MainAbility, UltraAbility};
+use enums::{Rarity};
 
-async fn get_html(url:&str) -> Result<String, Box<dyn Error>> {
-    color_eyre::install()?;
-    let client = reqwest::Client::new();
-
-    let request = client
-        .get(url) 
-        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-        .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-    let response = request.send().await?;
-
-    let body = response.text().await?;
-
-    Ok(body)
+#[skip_serializing_none]
+#[derive(Debug, Deserialize, Serialize)]
+struct Character{
+    name: String,
+    id: String,
+    rarity: Rarity,
+    tags: Vec<String>,
+    main_ability: MainAbility,
+    ultra_ability: Option<UltraAbility>
 }
 
-fn main() {
+async fn get_html(path:&str) -> Result<String, Box<dyn Error>> {
+    let url = String::from("https://legends.dbz.space");
+    let response = reqwest::Client::new()
+        .get(url + path) 
+        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+        .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+        .send().await?
+        .text().await?;
+    Ok(response)
+}
+fn get_character_info( html: String ) -> Result<Character,Box<dyn Error>>{
+    let document = scraper::Html::parse_document(&html);
+    let character = Character {name: String::from(""), id: todo!(), rarity: todo!(), tags: todo!(), main_ability: todo!(), ultra_ability: todo!() } ;
+    Ok(character)
+}
+#[tokio::main]
+async fn main() {
+    color_eyre::install().unwrap();
+    let url = "/characters/";
     
-    let url = "https://legends.dbz.space/characters/";
-    let rt = Runtime::new().unwrap();
-    rt.block_on(async {
-        get_html(url).await.unwrap();
-    });
+    let response = get_html(url).await.unwrap();
+    
+    let document = scraper::Html::parse_document(&response);
+    let select_char =  scraper::Selector::parse(".chara.list> a").unwrap();
+
+    let extracted_links: Vec<String> = document
+        .select(&select_char)
+        .map(|element| {
+            let href = element.value().attr("href").unwrap().to_string();
+            href
+        })
+        .collect();
+
+    for link in extracted_links{
+        let character = get_character_info(get_html(&link).await.unwrap());
+    }
 }
 
