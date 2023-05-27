@@ -1,43 +1,27 @@
-use headless_chrome::browser::context::Context;
-use headless_chrome::browser::tab::Tab;
-use headless_chrome::protocol::page::ScreenshotFormat;
-use std::error::Error;
+use std::{error::Error};
 use tokio::runtime::Runtime;
 
-fn scrape_page_with_js(url: &str) -> Result<(), Box<dyn Error>> {
-    // Create a new runtime
-    let mut rt = Runtime::new().unwrap();
+async fn get_html(url:&str) -> Result<String, Box<dyn Error>> {
+    color_eyre::install()?;
+    let client = reqwest::Client::new();
 
-    // Create a new browser context
-    let browser = rt.block_on(headless_chrome::Browser::new())?;
-    let context = rt.block_on(browser.new_context())?;
+    let request = client
+        .get(url) 
+        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+        .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+    let response = request.send().await?;
 
-    // Create a new tab in the context
-    let tab = rt.block_on(context.new_tab())?;
+    let body = response.text().await?;
 
-    // Enable JavaScript on the tab
-    rt.block_on(tab.enable_javascript())?;
-
-    // Navigate to the desired URL
-    rt.block_on(tab.navigate_to(url.into()))?;
-
-    // Wait for JavaScript execution to complete (adjust the delay as needed)
-    std::thread::sleep(std::time::Duration::from_secs(5));
-
-    // Take a screenshot of the page
-    let screenshot = rt.block_on(tab.capture_screenshot(ScreenshotFormat::PNG))?;
-
-    // Save the screenshot to a file named "index.html"
-    std::fs::write("index.html", screenshot)?;
-
-    Ok(())
+    Ok(body)
 }
 
 fn main() {
-    let url = "https://example.com";
-
-    match scrape_page_with_js(url) {
-        Ok(()) => println!("Page scraped successfully!"),
-        Err(err) => eprintln!("An error occurred: {:?}", err),
-    }
+    
+    let url = "https://legends.dbz.space/characters/";
+    let rt = Runtime::new().unwrap();
+    rt.block_on(async {
+        get_html(url).await.unwrap();
+    });
 }
+
