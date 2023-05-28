@@ -3,7 +3,7 @@ mod enums;
 use std::{error::Error};
 use serde::{ Deserialize, Serialize };
 use serde_with::skip_serializing_none;
-use structs::{MainAbility, UltraAbility};
+use structs::{MainAbility, UltraAbility, Stats};
 use enums::{Rarity};
 
 #[skip_serializing_none]
@@ -14,7 +14,9 @@ struct Character{
     rarity: Rarity,
     tags: Vec<String>,
     main_ability: MainAbility,
-    ultra_ability: Option<UltraAbility>
+    ultra_ability: Option<UltraAbility>,
+    base_stats: Stats,
+    max_stats: Stats
 }
 
 async fn get_html(path:&str) -> Result<String, Box<dyn Error>> {
@@ -27,10 +29,11 @@ async fn get_html(path:&str) -> Result<String, Box<dyn Error>> {
         .text().await?;
     Ok(response)
 }
+#[allow(unreachable_code)]
 fn get_character_info( html: String ) -> Result<Character,Box<dyn Error>>{
-    let document = scraper::Html::parse_document(&html);
-    let character = Character {name: String::from(""), id: todo!(), rarity: todo!(), tags: todo!(), main_ability: todo!(), ultra_ability: todo!() } ;
-    Ok(character)
+    let _document = scraper::Html::parse_document(&html);
+    let character = Character {name: String::from(""), id: todo!(), rarity: Rarity::Extreme, tags: todo!(), main_ability: todo!(), ultra_ability: todo!(), base_stats: todo!(), max_stats: todo!() } ;
+    return Ok(character)
 }
 #[tokio::main]
 async fn main() {
@@ -52,6 +55,7 @@ async fn main() {
 
     for link in extracted_links{
         let character = get_character_info(get_html(&link).await.unwrap());
+        println!("{:?}",character)
     }
 }
 

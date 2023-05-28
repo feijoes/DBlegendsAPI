@@ -15,5 +15,9 @@ pub enum Rarity{
 #[derive(Debug, Deserialize, Serialize)]
 pub enum Color {
     PUR,
-    YEL
+    YEL,
+    BLU,
+    RED,
+    GRN,
+    LGT
 }
