@@ -55,6 +55,9 @@ fn get_character_info( html: String ) -> Result<Option<Character>,Box<dyn Error>
 
     let tags_sele = Selector::parse(".ability.medium>a").unwrap();
     let tags: Vec<String> = document.select(&tags_sele).map(|element| { element.text().collect::<String>().replace("\n", "").replace("\t", "") }).collect();
+    
+    
+    
     println!("{name} {rarity} {id} {tags:?}");
     //let character = Character {name: name, id: id, rarity: rarity, tags: tags, main_ability: todo!(), ultra_ability: todo!(), base_stats: todo!(), max_stats: todo!(), unique_ability: todo!(), strike: todo!(), shot: todo!(), special_move: todo!(), special_skill: todo!(), ultimate_skill: todo!(), z_ability: todo!(), image_url: todo!(), is_lf: todo!() } ;
     return Ok(None)

@@ -1,0 +1,23 @@
+{
+  "name": "dblegendsapi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "format": "prettier --write ./src/**/*.ts && prettier --write ./dbl_scraper/src/**/*.rs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/feijoes/DBlegendsAPI.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/feijoes/DBlegendsAPI/issues"
+  },
+  "homepage": "https://github.com/feijoes/DBlegendsAPI#readme",
+  "dependencies": {
+    "prettier": "^2.8.8",
+    "prettier-plugin-rust": "^0.1.9"
+  }
+}
