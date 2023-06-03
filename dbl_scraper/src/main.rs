@@ -53,12 +53,18 @@ async fn get_html(path: &str) -> Result<String, Box<dyn Error>> {
         .text().await?;
     Ok(response)
 }
+
+fn remove_tabs_and_newlines(input: String) -> String {
+    let modified_string = input.replace("\t", "").replace("\n", "");
+    modified_string
+}
+
 #[allow(unreachable_code, unused_variables)]
 fn get_character_info(html: String) -> Result<Option<Character>, Box<dyn Error>> {
     let document = scraper::Html::parse_document(&html);
 
     let name_sele = Selector::parse(".head.name.large.img_back>h1").unwrap();
-    let name = document.select(&name_sele).next().unwrap().inner_html();
+    let name = remove_tabs_and_newlines(document.select(&name_sele).next().unwrap().inner_html());
 
     let id_sele = Selector::parse(".head.name.id-right.small.img_back").unwrap();
     let id = document.select(&id_sele).next().unwrap().inner_html();
@@ -71,11 +77,25 @@ fn get_character_info(html: String) -> Result<Option<Character>, Box<dyn Error>>
     let tags_sele = Selector::parse(".ability.medium>a").unwrap();
     let tags: Vec<String> = document
         .select(&tags_sele)
-        .map(|element| { element.text().collect::<String>().replace("\n", "").replace("\t", "") })
+        .map(|element| { remove_tabs_and_newlines(element.text().collect::<String>()) })
         .collect();
+    
+    let main_name_sele =  Selector::parse("div.frm.form0>.ability.medium").unwrap();
+    let main_name = remove_tabs_and_newlines(document.select(&main_name_sele).next().unwrap().inner_html());
+    let main_effect_sele = Selector::parse("div.frm.form0>.ability_text.small").unwrap();
+    let main_effect = remove_tabs_and_newlines(document.select(&main_effect_sele).next().unwrap().inner_html());
+  
+    let main =  MainAbility { name : main_name , effect: main_effect };
 
-    println!("{name} {rarity} {id} {tags:?}");
-    //let character = Character {name: name, id: id, rarity: rarity, tags: tags, main_ability: todo!(), ultra_ability: todo!(), base_stats: todo!(), max_stats: todo!(), unique_ability: todo!(), strike: todo!(), shot: todo!(), special_move: todo!(), special_skill: todo!(), ultimate_skill: todo!(), z_ability: todo!(), image_url: todo!(), is_lf: todo!() } ;
+
+    let ultra_name_sele =  Selector::parse("div.frm.form0>.ability.medium").unwrap();
+    let ultra_name = remove_tabs_and_newlines(document.select(&ultra_name_sele)
+    .next().unwrap().inner_html());
+    let ultra_effect_sele = Selector::parse("div.frm.form0>.ability_text.small").unwrap();
+    let ultra_effect = remove_tabs_and_newlines(document.select(&ultra_effect_sele).next().unwrap().inner_html());
+
+    println!("{}, {rarity}, {id}, {main}, {tags:?}",name);
+    //let character = Character {name: name, id: id, rarity: rarity, tags: tags, main_ability: main, ultra_ability: todo!(), base_stats: todo!(), max_stats: todo!(), unique_ability: todo!(), strike: todo!(), shot: todo!(), special_move: todo!(), special_skill: todo!(), ultimate_skill: todo!(), z_ability: todo!(), image_url: todo!(), is_lf: todo!() } ;
     return Ok(None);
 }
 #[tokio::main]

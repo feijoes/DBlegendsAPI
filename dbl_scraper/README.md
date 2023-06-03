@@ -27,5 +27,11 @@ Make sure you have the following installed:
     cargo run
     ```
 
-This will create a file in "data/Characters_{currect date}.json" with a json with the info of all characters available
+This will create a json file in "data/Characters_{currect date}.json" with the info of all characters available
 
+Character Json
+```json
+{
+
+}
+```

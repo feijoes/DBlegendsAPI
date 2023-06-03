@@ -59,3 +59,19 @@ pub struct SpecialSkill {
     pub name: String,
     pub effect: String,
 }
+
+use std::fmt;
+
+macro_rules! implement_display {
+    ($struct_name:ident, $field_name:ident) => {
+        impl fmt::Display for $struct_name {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                write!(f, "{}", self.$field_name)
+            }
+        }
+    };
+}
+
+implement_display!(MainAbility, name);
+implement_display!(UniqueAbility, name);
+implement_display!(UltraAbility, name);
