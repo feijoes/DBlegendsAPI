@@ -11,8 +11,10 @@ pub struct MainAbility {
 #[skip_serializing_none]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UniqueAbility {
-    pub name: String,
-    pub effect: String,
+    pub ability1_name: String,
+    pub ability1_effect: String,
+    pub ability2_name: String,
+    pub ability2_effect: String
 }
 
 #[skip_serializing_none]
@@ -25,12 +27,12 @@ pub struct UltraAbility {
 #[skip_serializing_none]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Stats {
-    power: f32,
-    health: f32,
-    strike_atk: f32,
-    strike_def: f32,
-    blast_atk: f32,
-    blast_def: f32,
+    pub power: i32,
+    pub health: i32,
+    pub strike_atk: i32,
+    pub strike_def: i32,
+    pub blast_atk: i32,
+    pub blast_def: i32,
 }
 #[skip_serializing_none]
 #[derive(Debug, Deserialize, Serialize)]
@@ -73,5 +75,5 @@ macro_rules! implement_display {
 }
 
 implement_display!(MainAbility, name);
-implement_display!(UniqueAbility, name);
+implement_display!(UniqueAbility, ability1_name);
 implement_display!(UltraAbility, name);
