@@ -14,7 +14,7 @@ use structs::{
     SpecialMove,
 };
 use enums::{ Rarity };
-use scraper::{ Selector };
+use scraper::{ Selector, Html };
 use std::str::FromStr;
 
 #[skip_serializing_none]
@@ -37,6 +37,8 @@ struct Character {
     ultimate_skill: UltimateSkill,
     z_ability: ZAbility,
     is_lf: bool,
+    is_tag: bool,
+    has_zenkai: bool
 }
 
 async fn get_html(path: &str) -> Result<String, Box<dyn Error>> {
@@ -58,20 +60,24 @@ fn remove_tabs_and_newlines(input: String) -> String {
     let modified_string = input.replace("\t", "").replace("\n", "");
     modified_string
 }
-
+fn get_inner_html(document: &Html,selector:&str) -> Option<String>{
+    let sele = Selector::parse(selector).unwrap();
+    Some(remove_tabs_and_newlines(document.select(&sele).next().unwrap().inner_html()))
+}
+fn get_text(document: &Html,selector:&str) -> Option<String>{
+    let sele = Selector::parse(selector).unwrap();
+    Some(remove_tabs_and_newlines(document.select(&sele).next().unwrap().text().collect::<String>()))
+}
 #[allow(unreachable_code, unused_variables)]
 fn get_character_info(html: String) -> Result<Option<Character>, Box<dyn Error>> {
     let document = scraper::Html::parse_document(&html);
 
-    let name_sele = Selector::parse(".head.name.large.img_back>h1").unwrap();
-    let name = remove_tabs_and_newlines(document.select(&name_sele).next().unwrap().inner_html());
+    let name = get_inner_html(&document, ".head.name.large.img_back>h1");
 
-    let id_sele = Selector::parse(".head.name.id-right.small.img_back").unwrap();
-    let id = document.select(&id_sele).next().unwrap().inner_html();
-
-    let rarity_sele = Selector::parse(".rarity").unwrap();
+    let id = get_inner_html(&document, ".head.name.id-right.small.img_back").unwrap();
+    
     let rarity = Rarity::from_str(
-        document.select(&rarity_sele).next().unwrap().inner_html().as_str()
+        get_inner_html(&document, ".rarity").unwrap().as_str()
     ).unwrap();
 
     let tags_sele = Selector::parse(".ability.medium>a").unwrap();
@@ -80,22 +86,21 @@ fn get_character_info(html: String) -> Result<Option<Character>, Box<dyn Error>>
         .map(|element| { remove_tabs_and_newlines(element.text().collect::<String>()) })
         .collect();
     
-    let main_name_sele =  Selector::parse("div.frm.form0>.ability.medium").unwrap();
-    let main_name = remove_tabs_and_newlines(document.select(&main_name_sele).next().unwrap().inner_html());
-    let main_effect_sele = Selector::parse("div.frm.form0>.ability_text.small").unwrap();
-    let main_effect = remove_tabs_and_newlines(document.select(&main_effect_sele).next().unwrap().inner_html());
-  
+    let main_name = get_inner_html(&document, "div.frm.form0>.ability.medium").unwrap();
+    let main_effect =  get_text(&document, "div.frm.form0>.ability_text.small").unwrap();
+    
     let main =  MainAbility { name : main_name , effect: main_effect };
 
 
-    let ultra_name_sele =  Selector::parse("div.frm.form0>.ability.medium").unwrap();
-    let ultra_name = remove_tabs_and_newlines(document.select(&ultra_name_sele)
-    .next().unwrap().inner_html());
-    let ultra_effect_sele = Selector::parse("div.frm.form0>.ability_text.small").unwrap();
-    let ultra_effect = remove_tabs_and_newlines(document.select(&ultra_effect_sele).next().unwrap().inner_html());
+    let ultra_name = get_inner_html(&document, "#charaultra + div.ability_text > .frm.form0 > span").unwrap_or_default();
+    let ultra_effect = get_text(&document, "#charaultra + div.ability_text > .frm.form0 > div").unwrap_or_default();
 
-    println!("{}, {rarity}, {id}, {main}, {tags:?}",name);
-    //let character = Character {name: name, id: id, rarity: rarity, tags: tags, main_ability: main, ultra_ability: todo!(), base_stats: todo!(), max_stats: todo!(), unique_ability: todo!(), strike: todo!(), shot: todo!(), special_move: todo!(), special_skill: todo!(), ultimate_skill: todo!(), z_ability: todo!(), image_url: todo!(), is_lf: todo!() } ;
+    let ultra = UltraAbility { name: ultra_name, effect: ultra_effect};
+
+    let unique_name1 = get_inner_html(&document, "#charaunique + div.ability_text > .frm.form0:nth-of-type(2) > span");
+
+    println!("");
+    //let character = Character {name: name, id: id, rarity: rarity, tags: tags, main_ability: main, ultra_ability: ultra, base_stats: todo!(), max_stats: todo!(), unique_ability: todo!(), strike: todo!(), shot: todo!(), special_move: todo!(), special_skill: todo!(), ultimate_skill: todo!(), z_ability: todo!(), image_url: todo!(), is_lf: todo!() } ;
     return Ok(None);
 }
 #[tokio::main]
