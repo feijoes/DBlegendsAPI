@@ -36,11 +36,18 @@ pub struct Stats {
 }
 #[skip_serializing_none]
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ZAbility {
-    pub one: String,
-    pub two: String,
-    pub three: String,
-    pub four: String,
+pub struct ZAbility{
+    pub tags: Vec<String>,
+    pub effect: String
+}
+
+#[skip_serializing_none]
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ZAbilities {
+    pub one: ZAbility,
+    pub two: ZAbility,
+    pub three: ZAbility,
+    pub four: ZAbility,
 }
 
 #[skip_serializing_none]
