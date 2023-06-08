@@ -9,7 +9,7 @@ use strum_macros::EnumString;
 pub enum Rarity {
     HERO,
     EXTREME,
-    SPAKING,
+    SPARKING,
     ULTRA,
 }
 
@@ -37,5 +37,5 @@ macro_rules! impl_display_enum {
     };
 }
 
-impl_display_enum!(Rarity { HERO, EXTREME, SPAKING, ULTRA });
+impl_display_enum!(Rarity { HERO, EXTREME, SPARKING, ULTRA });
 impl_display_enum!(Color { PUR, YEL, BLU, RED, GRN, LGT });

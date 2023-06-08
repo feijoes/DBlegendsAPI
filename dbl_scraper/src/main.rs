@@ -1,6 +1,6 @@
 mod structs;
 mod enums;
-use std::{ error::Error };
+use std::{ error::Error, fs::File, io::Write };
 use serde::{ Deserialize, Serialize };
 use serde_with::skip_serializing_none;
 use structs::{
@@ -14,7 +14,7 @@ use structs::{
     SpecialMove,
     ZAbilities,
 };
-use enums::{ Rarity };
+use enums::{ Rarity, Color };
 use scraper::{ Selector, Html };
 use std::str::FromStr;
 
@@ -23,6 +23,7 @@ use std::str::FromStr;
 struct Character {
     name: String,
     id: String,
+    color: Color,
     rarity: Rarity,
     tags: Vec<String>,
     main_ability: MainAbility,
@@ -62,23 +63,33 @@ fn remove_tabs_and_newlines(input: String) -> String {
     modified_string
 }
 
-fn get_inner_html(document: &Html, selector: &str) -> Option<String> {
-    let sele = Selector::parse(selector).unwrap();
-    Some(remove_tabs_and_newlines(document.select(&sele).next().unwrap().inner_html()))
+fn get_inner_html<'a>(document: &'a Html, selector: &'a str) -> Result<String, Box<dyn Error + 'a>> {
+    let sele = Selector::parse(selector)?;
+    let element = document.select(&sele).next().ok_or("Element not found")?;
+    let inner_html = remove_tabs_and_newlines(element.inner_html());
+
+    Ok(inner_html)
 }
-fn get_element(document: &Html, selector: &str) -> Option<String> {
-    let sele = Selector::parse(selector).unwrap();
-    Some(remove_tabs_and_newlines(document.select(&sele).next().unwrap().html()))
+fn get_element<'a>(document: &'a Html, selector: &'a str) -> Result<String, Box<dyn Error + 'a>> {
+    let sele = Selector::parse(selector)?;
+    let element = document.select(&sele).next().ok_or("Element not found")?;
+    let html = remove_tabs_and_newlines(element.html());
+
+    Ok(html)
 }
-fn get_text(document: &Html, selector: &str) -> Option<String> {
-    let sele = Selector::parse(selector).unwrap();
-    Some(
-        remove_tabs_and_newlines(document.select(&sele).next().unwrap().text().collect::<String>())
-    )
+fn get_text<'a>(document: &'a Html, selector: &'a str) -> Result<String, Box<dyn Error + 'a>> {
+    let sele = Selector::parse(selector)?;
+    let element = document.select(&sele).next().ok_or("Element not found")?;
+    let text = remove_tabs_and_newlines(element.text().collect::<String>());
+
+    Ok(text)
 }
-fn get_atribute(document: &Html, selector: &str, attr: &str) -> Option<String> {
-    let sele = Selector::parse(selector).unwrap();
-    Some(document.select(&sele).next().unwrap().value().attr(attr).unwrap().to_string())
+fn get_attribute<'a>(document: &'a Html, selector: &'a str, attr: &'a str) -> Result<String, Box<dyn Error + 'a>> {
+    let sele = Selector::parse(selector)?;
+    let element = document.select(&sele).next().ok_or("Element not found")?;
+    let attribute = element.value().attr(attr).ok_or("Attribute not found")?.to_string();
+
+    Ok(attribute)
 }
 fn extract_tags(text: String) -> (Vec<String>, String) {
     let mut tags: Vec<String> = Vec::new();
@@ -96,13 +107,14 @@ fn extract_tags(text: String) -> (Vec<String>, String) {
     (tags, div.text().collect::<String>())
 }
 #[allow(unreachable_code, unused_variables, unused_assignments)]
-fn get_character_info(html: String) -> Result<Option<Character>, Box<dyn Error>> {
+fn get_character_info(html: String) -> Result<Character, Box<dyn Error>> {
     let document = scraper::Html::parse_document(&html);
 
     let name = get_inner_html(&document, ".head.name.large.img_back>h1").unwrap();
 
     let id = get_inner_html(&document, ".head.name.id-right.small.img_back").unwrap();
 
+    let color = Color::from_str(get_inner_html(&document, "div.element").unwrap().as_str()).unwrap();
     let rarity = Rarity::from_str(get_inner_html(&document, ".rarity").unwrap().as_str()).unwrap();
 
     let tags_sele = Selector::parse(".ability.medium>a").unwrap();
@@ -150,10 +162,16 @@ fn get_character_info(html: String) -> Result<Option<Character>, Box<dyn Error>>
         "#charaunique + div.ability_text > .frm.form0:nth-of-type(2) > .ability_text"
     ).unwrap();
 
+    let unique_ability = UniqueAbility { 
+        ability1_name: unique_name1,
+        ability1_effect: unique_effect1,
+        ability2_name: unique_name2,
+        ability2_effect: unique_effect2
+    };
     let mut stats: Vec<String> = Vec::new();
     for i in 1..7 {
         let sele = format!(".row.lvlbreak.lvb1 > div:nth-of-type({}) > div.val", i);
-        stats.push(get_atribute(&document, sele.as_str(), "raw").unwrap());
+        stats.push(get_attribute(&document, sele.as_str(), "raw").unwrap());
     }
 
     let base_stats = Stats {
@@ -168,7 +186,7 @@ fn get_character_info(html: String) -> Result<Option<Character>, Box<dyn Error>>
     let mut stats2: Vec<String> = Vec::new();
     for i in 1..7 {
         let sele = format!(".row.lvlbreak.lvb5000 > div:nth-of-type({}) > div.val", i);
-        stats2.push(get_atribute(&document, sele.as_str(), "raw").unwrap());
+        stats2.push(get_attribute(&document, sele.as_str(), "raw").unwrap());
     }
     let max_stats = Stats {
         power: stats2.get(0).unwrap().parse().unwrap(),
@@ -179,7 +197,7 @@ fn get_character_info(html: String) -> Result<Option<Character>, Box<dyn Error>>
         blast_def: stats2.get(5).unwrap().parse().unwrap(),
     };
     
-    let image_url = get_atribute(&document, ".cutin.trs0.form0", "src");
+    let image_url = get_attribute(&document, ".cutin.trs0.form0", "src").unwrap();
 
     let strike = get_text(
         &document,
@@ -231,36 +249,48 @@ fn get_character_info(html: String) -> Result<Option<Character>, Box<dyn Error>>
     let three: (Vec<String>, String) = extract_tags(get_element(&document, ".zability.zIII > div").unwrap());
     let four: (Vec<String>, String) = extract_tags(get_element(&document, ".zability.zIV > div").unwrap());
    
-    let z_abilitie = ZAbilities {
+    let z_abilities = ZAbilities {
         one: ZAbility { tags: one.0, effect: one.1 },
         two: ZAbility { tags: two.0, effect: two.1 },
         three: ZAbility { tags: three.0, effect: three.1 },
         four: ZAbility { tags: four.0, effect: four.1 },
     };
 
-// let character = Character {
-//     name: name,
-//     id: id,
-//     rarity: rarity,
-//     tags: tags,
-//     main_ability: main,
-//     ultra_ability: ultra,
-//     base_stats: base_stats,
-//     max_stats: max_stats,
-//     unique_ability: unique_name1,
-//     strike: todo!(),
-//     shot: todo!(),
-//     special_move: todo!(),
-//     special_skill: todo!(),
-//     ultimate_skill: todo!(),
-//     z_ability: todo!(),
-//     image_url: todo!(),
-//     is_lf: todo!(),
-//     is_tag: todo!(),
-//     has_zenkai: todo!(),
-// };
+    // Some characters maybe have 1 Unique ability add for zenkai abilities
 
-    return Ok(None);
+     let character = Character {
+        name: name,
+        id: id,
+        rarity: rarity,
+        tags: tags,
+        main_ability: main,
+        ultra_ability: ultra,
+        base_stats: base_stats,
+        max_stats: max_stats,
+        unique_ability: unique_ability,
+        strike: strike,
+        shot: shot,
+        special_move: special_move,
+        special_skill: special_skill,
+        ultimate_skill: ultimate_skill,
+        z_ability: z_abilities,
+        image_url: image_url,
+        is_lf: false,
+        is_tag: false,
+        has_zenkai: false,
+        color: color,
+     };
+
+    return Ok(character);
+}
+
+fn generate_json(characters: &[Character], file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let json = serde_json::to_string(characters)?;
+
+    let mut file = File::create(file_path)?;
+    file.write_all(json.as_bytes())?;
+
+    Ok(())
 }
 #[tokio::main]
 async fn main() {
@@ -279,9 +309,12 @@ async fn main() {
             href
         })
         .collect();
-    get_character_info(get_html(&extracted_links.first().unwrap()).await.unwrap());
-    //for link in extracted_links{
-    //    let _character = );
+    let mut characters: Vec<Character> = Vec::new();
+    for link in extracted_links{
+        println!("{link}");
+        let character = get_character_info(get_html(&link).await.unwrap()).unwrap(); 
+        characters.push(character);
+    }
+    generate_json(&characters, "characters.json").unwrap();
 
-    //}
 }
