@@ -10,11 +10,15 @@ pub struct MainAbility {
 
 #[skip_serializing_none]
 #[derive(Debug, Deserialize, Serialize)]
+pub struct UniqueAbilities {
+    pub unique_start_abilities : Vec<UniqueAbility>,
+    pub unique_zenkai_abilities: Option<Vec<UniqueAbility>>,
+}
+#[skip_serializing_none]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct UniqueAbility {
-    pub ability1_name: String,
-    pub ability1_effect: String,
-    pub ability2_name: String,
-    pub ability2_effect: String
+    pub ability_name: String,
+    pub ability_effect: String
 }
 
 #[skip_serializing_none]
@@ -82,5 +86,4 @@ macro_rules! implement_display {
 }
 
 implement_display!(MainAbility, name);
-implement_display!(UniqueAbility, ability1_name);
 implement_display!(UltraAbility, name);

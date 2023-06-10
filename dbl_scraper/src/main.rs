@@ -12,7 +12,7 @@ use structs::{
     SpecialSkill,
     UltimateSkill,
     SpecialMove,
-    ZAbilities,
+    ZAbilities, UniqueAbilities,
 };
 use enums::{ Rarity, Color };
 use scraper::{ Selector, Html };
@@ -27,7 +27,7 @@ struct Character {
     rarity: Rarity,
     tags: Vec<String>,
     main_ability: MainAbility,
-    unique_ability: UniqueAbility,
+    unique_ability: UniqueAbilities,
     ultra_ability: Option<UltraAbility>,
     base_stats: Stats,
     max_stats: Stats,
@@ -106,6 +106,11 @@ fn extract_tags(text: String) -> (Vec<String>, String) {
 
     (tags, div.text().collect::<String>())
 }
+fn element_exists<'a>(document: &'a Html, selector: &'a str) -> Result<bool, Box<dyn Error + 'a>> {
+    let sele = Selector::parse(selector)?;
+    let exists = document.select(&sele).next().is_some();
+    Ok(exists)
+}
 #[allow(unreachable_code, unused_variables, unused_assignments)]
 fn get_character_info(html: String) -> Result<Character, Box<dyn Error>> {
     let document = scraper::Html::parse_document(&html);
@@ -138,36 +143,51 @@ fn get_character_info(html: String) -> Result<Character, Box<dyn Error>> {
         "#charaultra + div.ability_text > .frm.form0 > div"
     ).unwrap_or(String::from(""));
 
-    let ultra = if ultra_name == "" {
+    let ultra = if ultra_name != "" {
         Some(UltraAbility { name: ultra_name, effect: ultra_effect })
     } else {
         None
     };
 
-    let unique_name1 = get_inner_html(
-        &document,
-        "#charaunique + div.ability_text > .frm.form0 > span"
-    ).unwrap();
-    let unique_effect1 = get_text(
-        &document,
-        "#charaunique + div.ability_text > .frm.form0> .ability_text"
-    ).unwrap();
+    let unique_abilities_selector = Selector::parse("#charaunique + div.ability_text").unwrap();
 
-    let unique_name2 = get_inner_html(
-        &document,
-        "#charaunique + div.ability_text > .frm.form0:nth-of-type(2) > span"
-    ).unwrap();
-    let unique_effect2 = get_text(
-        &document,
-        "#charaunique + div.ability_text > .frm.form0:nth-of-type(2) > .ability_text"
-    ).unwrap();
+    let element_unique_ability = document
+        .select(&unique_abilities_selector).next().unwrap();
+    let mut main_unique_abilities : Vec<UniqueAbility> = Vec::new();
+    for ability in element_unique_ability.select(&Selector::parse(".frm.form0").unwrap()){
+        main_unique_abilities.push(UniqueAbility { 
+            ability_name: remove_tabs_and_newlines(ability.select(&Selector::parse("span").unwrap()).next().unwrap().text().collect::<String>()),
+            ability_effect: remove_tabs_and_newlines(ability.select(&Selector::parse(".ability_text").unwrap()).next().unwrap().text().collect::<String>())
+        });
+    }
+   
+    
+    let element_unique_ability = document.select(&unique_abilities_selector).next().unwrap();
+    let mut unique_zenkai_abilities: Option<Vec<UniqueAbility>> = Some(
+    element_unique_ability
+        .select(&Selector::parse(".frm.form1").unwrap())
+        .map(|ability| {
+            let ability_name = remove_tabs_and_newlines(ability.select(&Selector::parse("span").unwrap()).next().unwrap().text().collect::<String>());
+            let ability_effect = remove_tabs_and_newlines(ability.select(&Selector::parse(".ability_text").unwrap()).next().unwrap().text().collect::<String>());
 
-    let unique_ability = UniqueAbility { 
-        ability1_name: unique_name1,
-        ability1_effect: unique_effect1,
-        ability2_name: unique_name2,
-        ability2_effect: unique_effect2
-    };
+            UniqueAbility {
+                ability_name,
+                ability_effect,
+            }
+        })
+        .collect::<Vec<_>>()
+    );
+    let mut has_zenkai = false;
+    if unique_zenkai_abilities.as_ref().map(Vec::is_empty).unwrap_or(true) {
+        unique_zenkai_abilities = None;
+    } else {
+        has_zenkai = true;
+    }
+    let unique_abilities = UniqueAbilities {
+        unique_start_abilities: main_unique_abilities,
+        unique_zenkai_abilities: unique_zenkai_abilities 
+    };    
+
     let mut stats: Vec<String> = Vec::new();
     for i in 1..7 {
         let sele = format!(".row.lvlbreak.lvb1 > div:nth-of-type({}) > div.val", i);
@@ -239,7 +259,7 @@ fn get_character_info(html: String) -> Result<Character, Box<dyn Error>> {
         "#charaultimate_skill + div > div > div.ability_text.small"
     ).unwrap_or(String::from(""));
 
-    let ultimate_skill = if ultimate_skill_name == "" {
+    let ultimate_skill = if ultimate_skill_name != "" {
         Some(UltimateSkill { name: ultimate_skill_name, effect: ultimate_skill_effect })
     } else {
         None
@@ -267,7 +287,7 @@ fn get_character_info(html: String) -> Result<Character, Box<dyn Error>> {
         ultra_ability: ultra,
         base_stats: base_stats,
         max_stats: max_stats,
-        unique_ability: unique_ability,
+        unique_ability: unique_abilities,
         strike: strike,
         shot: shot,
         special_move: special_move,
@@ -275,9 +295,9 @@ fn get_character_info(html: String) -> Result<Character, Box<dyn Error>> {
         ultimate_skill: ultimate_skill,
         z_ability: z_abilities,
         image_url: image_url,
-        is_lf: false,
+        is_lf: element_exists(&document, ".legends-limited").unwrap(),
         is_tag: false,
-        has_zenkai: false,
+        has_zenkai: has_zenkai,
         color: color,
      };
 
