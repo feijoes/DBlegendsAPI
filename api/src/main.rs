@@ -1,9 +1,18 @@
+mod server;
+mod types;
+mod character;
+mod readfile;
+
+use character::Character;
 use actix_web::{ web::{ self, QueryConfig }, App, HttpServer };
-use api::server;
 use std::env;
-use types::structs::AppState;
 use readfile::get_content;
 use dotenv::dotenv;
+
+use types::structs::AppState;
+
+
+
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
