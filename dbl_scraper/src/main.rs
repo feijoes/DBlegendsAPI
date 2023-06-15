@@ -12,7 +12,8 @@ use structs::{
     SpecialSkill,
     UltimateSkill,
     SpecialMove,
-    ZAbilities, UniqueAbilities,
+    ZAbilities,
+    UniqueAbilities,
 };
 use enums::{ Rarity, Color };
 use scraper::{ Selector, Html };
@@ -63,7 +64,10 @@ fn remove_tabs_and_newlines(input: String) -> String {
     modified_string
 }
 
-fn get_inner_html<'a>(document: &'a Html, selector: &'a str) -> Result<String, Box<dyn Error + 'a>> {
+fn get_inner_html<'a>(
+    document: &'a Html,
+    selector: &'a str
+) -> Result<String, Box<dyn Error + 'a>> {
     let sele = Selector::parse(selector)?;
     let element = document.select(&sele).next().ok_or("Element not found")?;
     let inner_html = remove_tabs_and_newlines(element.inner_html());
@@ -84,7 +88,11 @@ fn get_text<'a>(document: &'a Html, selector: &'a str) -> Result<String, Box<dyn
 
     Ok(text)
 }
-fn get_attribute<'a>(document: &'a Html, selector: &'a str, attr: &'a str) -> Result<String, Box<dyn Error + 'a>> {
+fn get_attribute<'a>(
+    document: &'a Html,
+    selector: &'a str,
+    attr: &'a str
+) -> Result<String, Box<dyn Error + 'a>> {
     let sele = Selector::parse(selector)?;
     let element = document.select(&sele).next().ok_or("Element not found")?;
     let attribute = element.value().attr(attr).ok_or("Attribute not found")?.to_string();
@@ -101,8 +109,8 @@ fn extract_tags(text: String) -> (Vec<String>, String) {
 
     let div = fragment.select(&div_selector).next().unwrap();
     for element in div.select(&a_selector) {
-       tags.push(element.inner_html());
-    };
+        tags.push(element.inner_html());
+    }
 
     (tags, div.text().collect::<String>())
 }
@@ -119,7 +127,9 @@ fn get_character_info(html: String) -> Result<Character, Box<dyn Error>> {
 
     let id = get_inner_html(&document, ".head.name.id-right.small.img_back").unwrap();
 
-    let color = Color::from_str(get_inner_html(&document, "div.element").unwrap().as_str()).unwrap();
+    let color = Color::from_str(
+        get_inner_html(&document, "div.element").unwrap().as_str()
+    ).unwrap();
     let rarity = Rarity::from_str(get_inner_html(&document, ".rarity").unwrap().as_str()).unwrap();
 
     let tags_sele = Selector::parse(".ability.medium>a").unwrap();
@@ -151,31 +161,57 @@ fn get_character_info(html: String) -> Result<Character, Box<dyn Error>> {
 
     let unique_abilities_selector = Selector::parse("#charaunique + div.ability_text").unwrap();
 
-    let element_unique_ability = document
-        .select(&unique_abilities_selector).next().unwrap();
-    let mut main_unique_abilities : Vec<UniqueAbility> = Vec::new();
-    for ability in element_unique_ability.select(&Selector::parse(".frm.form0").unwrap()){
-        main_unique_abilities.push(UniqueAbility { 
-            ability_name: remove_tabs_and_newlines(ability.select(&Selector::parse("span").unwrap()).next().unwrap().text().collect::<String>()),
-            ability_effect: remove_tabs_and_newlines(ability.select(&Selector::parse(".ability_text").unwrap()).next().unwrap().text().collect::<String>())
+    let element_unique_ability = document.select(&unique_abilities_selector).next().unwrap();
+    let mut main_unique_abilities: Vec<UniqueAbility> = Vec::new();
+    for ability in element_unique_ability.select(&Selector::parse(".frm.form0").unwrap()) {
+        main_unique_abilities.push(UniqueAbility {
+            ability_name: remove_tabs_and_newlines(
+                ability
+                    .select(&Selector::parse("span").unwrap())
+                    .next()
+                    .unwrap()
+                    .text()
+                    .collect::<String>()
+            ),
+            ability_effect: remove_tabs_and_newlines(
+                ability
+                    .select(&Selector::parse(".ability_text").unwrap())
+                    .next()
+                    .unwrap()
+                    .text()
+                    .collect::<String>()
+            ),
         });
     }
-   
-    
+
     let element_unique_ability = document.select(&unique_abilities_selector).next().unwrap();
     let mut unique_zenkai_abilities: Option<Vec<UniqueAbility>> = Some(
-    element_unique_ability
-        .select(&Selector::parse(".frm.form1").unwrap())
-        .map(|ability| {
-            let ability_name = remove_tabs_and_newlines(ability.select(&Selector::parse("span").unwrap()).next().unwrap().text().collect::<String>());
-            let ability_effect = remove_tabs_and_newlines(ability.select(&Selector::parse(".ability_text").unwrap()).next().unwrap().text().collect::<String>());
+        element_unique_ability
+            .select(&Selector::parse(".frm.form1").unwrap())
+            .map(|ability| {
+                let ability_name = remove_tabs_and_newlines(
+                    ability
+                        .select(&Selector::parse("span").unwrap())
+                        .next()
+                        .unwrap()
+                        .text()
+                        .collect::<String>()
+                );
+                let ability_effect = remove_tabs_and_newlines(
+                    ability
+                        .select(&Selector::parse(".ability_text").unwrap())
+                        .next()
+                        .unwrap()
+                        .text()
+                        .collect::<String>()
+                );
 
-            UniqueAbility {
-                ability_name,
-                ability_effect,
-            }
-        })
-        .collect::<Vec<_>>()
+                UniqueAbility {
+                    ability_name,
+                    ability_effect,
+                }
+            })
+            .collect::<Vec<_>>()
     );
     let mut has_zenkai = false;
     if unique_zenkai_abilities.as_ref().map(Vec::is_empty).unwrap_or(true) {
@@ -185,8 +221,8 @@ fn get_character_info(html: String) -> Result<Character, Box<dyn Error>> {
     }
     let unique_abilities = UniqueAbilities {
         unique_start_abilities: main_unique_abilities,
-        unique_zenkai_abilities: unique_zenkai_abilities 
-    };    
+        unique_zenkai_abilities: unique_zenkai_abilities,
+    };
 
     let mut stats: Vec<String> = Vec::new();
     for i in 1..7 {
@@ -216,7 +252,7 @@ fn get_character_info(html: String) -> Result<Character, Box<dyn Error>> {
         blast_atk: stats2.get(4).unwrap().parse().unwrap(),
         blast_def: stats2.get(5).unwrap().parse().unwrap(),
     };
-    
+
     let image_url = get_attribute(&document, ".cutin.trs0.form0", "src").unwrap();
 
     let strike = get_text(
@@ -227,7 +263,7 @@ fn get_character_info(html: String) -> Result<Character, Box<dyn Error>> {
         &document,
         "#charashot + .ability_text.arts > .frm.form0 >.ability_text.small"
     ).unwrap();
- 
+
     let special_move_name = get_text(
         &document,
         "#charaspecial_move + div > div > span.ability.medium"
@@ -264,11 +300,19 @@ fn get_character_info(html: String) -> Result<Character, Box<dyn Error>> {
     } else {
         None
     };
-    let one: (Vec<String>, String) = extract_tags(get_element(&document, ".zability.zI > div").unwrap());
-    let two: (Vec<String>, String) = extract_tags(get_element(&document, ".zability.zII > div").unwrap());
-    let three: (Vec<String>, String) = extract_tags(get_element(&document, ".zability.zIII > div").unwrap());
-    let four: (Vec<String>, String) = extract_tags(get_element(&document, ".zability.zIV > div").unwrap());
-   
+    let one: (Vec<String>, String) = extract_tags(
+        get_element(&document, ".zability.zI > div").unwrap()
+    );
+    let two: (Vec<String>, String) = extract_tags(
+        get_element(&document, ".zability.zII > div").unwrap()
+    );
+    let three: (Vec<String>, String) = extract_tags(
+        get_element(&document, ".zability.zIII > div").unwrap()
+    );
+    let four: (Vec<String>, String) = extract_tags(
+        get_element(&document, ".zability.zIV > div").unwrap()
+    );
+
     let z_abilities = ZAbilities {
         one: ZAbility { tags: one.0, effect: one.1 },
         two: ZAbility { tags: two.0, effect: two.1 },
@@ -278,7 +322,7 @@ fn get_character_info(html: String) -> Result<Character, Box<dyn Error>> {
 
     // Some characters maybe have 1 Unique ability add for zenkai abilities
 
-     let character = Character {
+    let character = Character {
         name: name,
         id: id,
         rarity: rarity,
@@ -299,12 +343,15 @@ fn get_character_info(html: String) -> Result<Character, Box<dyn Error>> {
         is_tag: false,
         has_zenkai: has_zenkai,
         color: color,
-     };
+    };
 
     return Ok(character);
 }
 
-fn generate_json(characters: &[Character], file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+fn generate_json(
+    characters: &[Character],
+    file_path: &str
+) -> Result<(), Box<dyn std::error::Error>> {
     let json = serde_json::to_string(characters)?;
 
     let mut file = File::create(file_path)?;
@@ -330,11 +377,10 @@ async fn main() {
         })
         .collect();
     let mut characters: Vec<Character> = Vec::new();
-    for link in extracted_links{
+    for link in extracted_links {
         println!("{link}");
-        let character = get_character_info(get_html(&link).await.unwrap()).unwrap(); 
+        let character = get_character_info(get_html(&link).await.unwrap()).unwrap();
         characters.push(character);
     }
     generate_json(&characters, "characters.json").unwrap();
-
 }

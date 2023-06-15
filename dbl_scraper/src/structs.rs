@@ -11,14 +11,14 @@ pub struct MainAbility {
 #[skip_serializing_none]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UniqueAbilities {
-    pub unique_start_abilities : Vec<UniqueAbility>,
+    pub unique_start_abilities: Vec<UniqueAbility>,
     pub unique_zenkai_abilities: Option<Vec<UniqueAbility>>,
 }
 #[skip_serializing_none]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UniqueAbility {
     pub ability_name: String,
-    pub ability_effect: String
+    pub ability_effect: String,
 }
 
 #[skip_serializing_none]
@@ -40,9 +40,9 @@ pub struct Stats {
 }
 #[skip_serializing_none]
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ZAbility{
+pub struct ZAbility {
     pub tags: Vec<String>,
-    pub effect: String
+    pub effect: String,
 }
 
 #[skip_serializing_none]
