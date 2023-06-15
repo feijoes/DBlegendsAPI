@@ -1,4 +1,4 @@
-use crate::types::enums::Rarity;
+use crate::types::enums::{Rarity,Color};
 use serde::{ Deserialize, Serialize };
 use serde_with::skip_serializing_none;
 use std::{sync::{Arc, RwLock}};
@@ -21,15 +21,17 @@ pub struct ApiParams {
     #[serde_as(as = "Option<StringWithSeparator::<CommaSeparator, String>>")]
     pub title: Option<Vec<String>>,
     #[serde_as(as = "Option<StringWithSeparator::<CommaSeparator, String>>")]
-    pub categories: Option<Vec<String>>,
+    pub tags: Option<Vec<String>>,
     pub sort_by: Option<SortOptions>,
     #[serde_as(as = "Option<StringWithSeparator::<CommaSeparator, String>>")]
     pub id: Option<Vec<String>>,
-    #[serde(rename = "type")]
     pub rarity: Option<Rarity>,
+    pub color: Option<Color>,
     pub reverse: Option<bool>,
+    pub has_zenkai: Option<bool>,
+    pub is_lf: Option<bool>,
+    
 }
-
 
 #[skip_serializing_none]
 #[derive(Debug, Deserialize, Serialize)]

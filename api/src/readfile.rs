@@ -5,7 +5,7 @@ use std::io::Read;
 use std::sync::{ Arc, RwLock };
 
 pub fn get_content(file_name: String) -> Arc<RwLock<Vec<Character>>> {
-    let mut file: File = File::open(format!("../data/{}", file_name.as_str())).expect(
+    let mut file: File = File::open(format!("./data/{}", file_name)).expect(
         "Failed to open file"
     );
     let mut contents: String = String::new();

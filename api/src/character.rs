@@ -37,3 +37,4 @@ pub struct Character {
     pub is_tag: bool,
     pub has_zenkai: bool,
 }
+

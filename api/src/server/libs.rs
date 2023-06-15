@@ -15,12 +15,24 @@ pub fn apply_filters(params: ApiParams, characters: &Vec<Character>) -> Vec<&Cha
             if let Some(name) = &params.name {
                 matched &= name.iter().any(|n| &character.name == n);
             }
-
             if let Some(fname) = &params.fname {
                 matched &= fname.iter().any(|fnm| character.name.contains(fnm));
             }
             if let Some(rarity) = &params.rarity {
                 matched &= character.rarity.as_string() == rarity.as_string();
+            }
+            if let Some(color) = &params.color {
+                matched &= character.color.as_string() == color.as_string();
+            }
+            if let Some(id) = &params.id {
+                matched &= id.iter().any(|c| &character.id == c);
+            }
+            if let Some(tags) = &params.tags {
+                matched &= tags.iter().any(|tag| {
+                    character.tags
+                        .iter()
+                        .any(|c| c == tag)
+                });
             }
             matched
         })
