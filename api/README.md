@@ -1,3 +1,21 @@
+# Instructions for running locally
+
+###  Prerequisites
+
+Make sure you have the following installed:
+
+- [Rust](https://www.rust-lang.org/tools/install)
+- [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
+
+### Getting Started 
+
+1. Clone the repo 
+
+2. generate the characters.json file in scraper
+
+3. go to /api/ run with `cargo run`
+
+
 # API Documentation
 
 #### Current Entities
