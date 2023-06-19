@@ -27,7 +27,7 @@ Make sure you have the following installed:
     cargo run
     ```
 
-This will create a json file in "data/Characters.json" with the info of all characters available
+This will create a json file in "Characters.json" with the info of all characters available
 
 Character Json
 ```json
