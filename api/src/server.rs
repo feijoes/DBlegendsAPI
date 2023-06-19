@@ -1,9 +1,6 @@
 mod libs;
-use libs::{apply_filters,apply_sort};
-use crate::{
-    types::structs::{ AppState, ApiParams },
-    character::Character
-};
+use libs::{ apply_filters, apply_sort };
+use crate::{ types::structs::{ AppState, ApiParams }, character::Character };
 use actix_web::{
     web,
     HttpResponse,
@@ -18,7 +15,7 @@ pub async fn index(
     web::Query(params): web::Query<ApiParams>
 ) -> HttpResponse {
     let characters: &Vec<Character> = &*state.characters.read().unwrap();
-    println!("{:?}",params);
+    println!("{:?}", params);
     let filter_characters = apply_filters(params.clone(), characters);
     let sort_characters = apply_sort(params.clone(), filter_characters);
 

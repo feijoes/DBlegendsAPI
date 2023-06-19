@@ -1,7 +1,4 @@
-use crate::{
-    character::Character,
-    types::{structs::{ApiParams},enums::SortOptions}
-};
+use crate::{ character::Character, types::{ structs::{ ApiParams }, enums::SortOptions } };
 macro_rules! sort_by_field {
     ($field:ident, $a:expr, $b:expr) => {
         $a.$field.cmp(&$b.$field)
@@ -22,29 +19,25 @@ pub fn apply_filters(params: ApiParams, characters: &Vec<Character>) -> Vec<&Cha
                 matched &= rarity.iter().any(|r| &character.rarity == r);
             }
             if let Some(color) = &params.color {
-                matched &= color.iter().any(|c| &character.color ==  c)
+                matched &= color.iter().any(|c| &character.color == c);
             }
             if let Some(id) = &params.id {
                 matched &= id.iter().any(|c| &character.id == c);
             }
             if let Some(tags) = &params.tags {
-                matched &= tags.iter().any(|tag| {
-                    character.tags
-                        .iter()
-                        .any(|c| c == tag)
-                });
+                matched &= tags.iter().any(|tag| { character.tags.iter().any(|c| c == tag) });
             }
-            if let Some(_) = &params.has_zenkai{
-                matched &= character.has_zenkai
+            if let Some(_) = &params.has_zenkai {
+                matched &= character.has_zenkai;
             }
-            if let Some(_) = &params.has_ultimate{
-                matched &= character.ultimate_skill.is_some()
+            if let Some(_) = &params.has_ultimate {
+                matched &= character.ultimate_skill.is_some();
             }
-            if let Some(_) = &params.is_tag{
-                matched &= character.is_tag
+            if let Some(_) = &params.is_tag {
+                matched &= character.is_tag;
             }
-            if let Some(_)= &params.is_lf{
-                matched &= character.is_lf
+            if let Some(_) = &params.is_lf {
+                matched &= character.is_lf;
             }
             matched
         })

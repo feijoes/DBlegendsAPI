@@ -1,7 +1,7 @@
-use crate::types::enums::{Rarity,Color};
+use crate::types::enums::{ Rarity, Color };
 use serde::{ Deserialize, Serialize };
 use serde_with::skip_serializing_none;
-use std::{sync::{Arc, RwLock}};
+use std::{ sync::{ Arc, RwLock } };
 use serde_with::{ StringWithSeparator, formats::CommaSeparator };
 
 #[derive(Debug)]
@@ -32,7 +32,6 @@ pub struct ApiParams {
     pub has_ultimate: Option<bool>,
     pub is_tag: Option<bool>,
     pub is_lf: Option<bool>,
-    
 }
 
 #[skip_serializing_none]

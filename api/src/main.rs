@@ -11,9 +11,6 @@ use dotenv::dotenv;
 
 use types::structs::AppState;
 
-
-
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();

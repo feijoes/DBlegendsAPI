@@ -16,7 +16,7 @@ macro_rules! impl_enum_as_string {
 }
 
 #[skip_serializing_none]
-#[derive(Debug, Deserialize, Serialize, EnumString, Clone, Ord, PartialEq, PartialOrd, Eq, )]
+#[derive(Debug, Deserialize, Serialize, EnumString, Clone, Ord, PartialEq, PartialOrd, Eq)]
 pub enum Rarity {
     HERO,
     EXTREME,
@@ -25,7 +25,7 @@ pub enum Rarity {
 }
 
 #[skip_serializing_none]
-#[derive(Debug, Deserialize, Serialize, EnumString, Clone, Ord, PartialEq, PartialOrd, Eq, )]
+#[derive(Debug, Deserialize, Serialize, EnumString, Clone, Ord, PartialEq, PartialOrd, Eq)]
 pub enum Color {
     PUR,
     YEL,
@@ -37,7 +37,7 @@ pub enum Color {
 
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub enum SortOptions{
+pub enum SortOptions {
     Name,
     Color,
     Rarity,
@@ -57,5 +57,5 @@ macro_rules! impl_display_enum {
 
 impl_display_enum!(Rarity { HERO, EXTREME, SPARKING, ULTRA });
 impl_display_enum!(Color { PUR, YEL, BLU, RED, GRN, LGT });
-impl_enum_as_string!(Color {PUR,YEL,BLU,RED,GRN,LGT,});
-impl_enum_as_string!(Rarity { HERO, EXTREME, SPARKING, ULTRA});
+impl_enum_as_string!(Color { PUR, YEL, BLU, RED, GRN, LGT });
+impl_enum_as_string!(Rarity { HERO, EXTREME, SPARKING, ULTRA });

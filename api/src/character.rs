@@ -12,7 +12,6 @@ use crate::types::structs::{
     UniqueAbilities,
 };
 
-
 #[skip_serializing_none]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Character {
@@ -37,4 +36,3 @@ pub struct Character {
     pub is_tag: bool,
     pub has_zenkai: bool,
 }
-
