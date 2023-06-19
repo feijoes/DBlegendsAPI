@@ -1,9 +1,12 @@
 # DBlegendsAPI
 
-Welcome to DBlegendsAPI!, this API is designed to allow the user to search for character/'s data for the mobile game Dragon Ball Legends. It consists of two main folders: `dbl_scrapper` and `api`.
+Welcome to DBlegendsAPI!, this API is designed to allow the user to search for character/'s data for the mobile game Dragon Ball Legends.
+
+
+![349851802_5894203507357664_2491298238811914820_n](https://github.com/feijoes/DBlegendsAPI/assets/74252371/c24dca09-2465-4f24-b5df-53a67d64b864)
 
 ## Folder Structure
-
+ It consists of two main folders: `dbl_scrapper` and `api`.
 - `dbl_scrapper`: This folder contains the web scrapper that extracts character data from the Dragon Ball space website
 - `api`: This folder contains the implementation of the API that serves the extracted character data.
 
@@ -15,7 +18,6 @@ DBlegendsAPI is a project that I undertook to learn and practice web scraping te
 
 As a passionate fan of the game, I was eager to explore and analyze character information programmatically. However, my search for a suitable API came up empty. Determined to find a solution, I decided to take matters into my own hands and create my own API.
 
-
 ## Contribution
 
 The API is functional, but it is not yet 100% complete. Currently,the api is only for characters and the scrapper does not search for tag color, stats of transformation characters, and many other things. However, it provides a solid foundation for retrieving basic character data.
@@ -25,3 +27,4 @@ If you have any ideas for improvement or additional features, please feel free t
 ## License
 
 DBlegendsAPI is released under the [MIT License](LICENSE). You are free to use, modify, and distribute the code as per the terms of the license. Enjoy exploring Dragon Ball Legends with DBlegendsAPI!
+
