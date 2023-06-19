@@ -19,10 +19,10 @@ pub fn apply_filters(params: ApiParams, characters: &Vec<Character>) -> Vec<&Cha
                 matched &= fname.iter().any(|fnm| character.name.contains(fnm));
             }
             if let Some(rarity) = &params.rarity {
-                matched &= character.rarity.as_string() == rarity.as_string();
+                matched &= rarity.iter().any(|r| &character.rarity == r);
             }
             if let Some(color) = &params.color {
-                matched &= character.color.as_string() == color.as_string();
+                matched &= color.iter().any(|c| &character.color ==  c)
             }
             if let Some(id) = &params.id {
                 matched &= id.iter().any(|c| &character.id == c);
@@ -33,6 +33,18 @@ pub fn apply_filters(params: ApiParams, characters: &Vec<Character>) -> Vec<&Cha
                         .iter()
                         .any(|c| c == tag)
                 });
+            }
+            if let Some(_) = &params.has_zenkai{
+                matched &= character.has_zenkai
+            }
+            if let Some(_) = &params.has_ultimate{
+                matched &= character.ultimate_skill.is_some()
+            }
+            if let Some(_) = &params.is_tag{
+                matched &= character.is_tag
+            }
+            if let Some(_)= &params.is_lf{
+                matched &= character.is_lf
             }
             matched
         })
@@ -46,6 +58,8 @@ pub fn apply_sort(params: ApiParams, mut characters: Vec<&Character>) -> Vec<&Ch
         characters.sort_by(|a, b| {
             match sort_by {
                 SortOptions::Name => sort_by_field!(name, a, b),
+                SortOptions::Color => sort_by_field!(color, a, b),
+                SortOptions::Rarity => sort_by_field!(rarity, a, b),
             }
         });
     }

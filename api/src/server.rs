@@ -18,7 +18,7 @@ pub async fn index(
     web::Query(params): web::Query<ApiParams>
 ) -> HttpResponse {
     let characters: &Vec<Character> = &*state.characters.read().unwrap();
-
+    println!("{:?}",params);
     let filter_characters = apply_filters(params.clone(), characters);
     let sort_characters = apply_sort(params.clone(), filter_characters);
 

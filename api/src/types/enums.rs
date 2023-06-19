@@ -38,7 +38,9 @@ pub enum Color {
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum SortOptions{
-    Name
+    Name,
+    Color,
+    Rarity,
 }
 macro_rules! impl_display_enum {
     ($enum_name:ident { $($variant:ident),* }) => {

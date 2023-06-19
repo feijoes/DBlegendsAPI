@@ -19,16 +19,18 @@ pub struct ApiParams {
     #[serde_as(as = "Option<StringWithSeparator::<CommaSeparator, String>>")]
     pub fname: Option<Vec<String>>,
     #[serde_as(as = "Option<StringWithSeparator::<CommaSeparator, String>>")]
-    pub title: Option<Vec<String>>,
-    #[serde_as(as = "Option<StringWithSeparator::<CommaSeparator, String>>")]
     pub tags: Option<Vec<String>>,
     pub sort_by: Option<SortOptions>,
     #[serde_as(as = "Option<StringWithSeparator::<CommaSeparator, String>>")]
     pub id: Option<Vec<String>>,
-    pub rarity: Option<Rarity>,
-    pub color: Option<Color>,
+    #[serde_as(as = "Option<StringWithSeparator::<CommaSeparator, Rarity>>")]
+    pub rarity: Option<Vec<Rarity>>,
+    #[serde_as(as = "Option<StringWithSeparator::<CommaSeparator, Color>>")]
+    pub color: Option<Vec<Color>>,
     pub reverse: Option<bool>,
     pub has_zenkai: Option<bool>,
+    pub has_ultimate: Option<bool>,
+    pub is_tag: Option<bool>,
     pub is_lf: Option<bool>,
     
 }
