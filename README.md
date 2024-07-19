@@ -17,8 +17,6 @@ To get started, please refer to the respective `README.md` files in each folder 
 
 DBlegendsAPI is a project that I undertook to learn and practice web scraping techniques using Rust. Additionally, it was born out of my frustration with the unavailability of an existing API for accessing data from Dragon Ball Legends.
 
-As a passionate fan of the game, I was eager to explore and analyze character information programmatically. However, my search for a suitable API came up empty. Determined to find a solution, I decided to take matters into my own hands and create my own API.
-
 **Important**: The scraper may be outdated
 
 ## Contribution
