@@ -45,7 +45,7 @@ struct Character {
     has_zenkai: bool,
 }
 ```
-You can see all the enums is structs used in [struct.rs](https://github.com/feijoes/DBlegendsAPI/blob/main/api/src/types/structs.rs) and in [enums.rs](https://github.com/feijoes/DBlegendsAPI/blob/main/api/src/types/enums.rs)
+You can see all the enums and structs used in [struct.rs](https://github.com/feijoes/DBlegendsAPI/blob/main/api/src/types/structs.rs) and in [enums.rs](https://github.com/feijoes/DBlegendsAPI/blob/main/api/src/types/enums.rs)
 
 ### URLs
 The current URL for the api is `http://localhost:1000/api/v1/`
